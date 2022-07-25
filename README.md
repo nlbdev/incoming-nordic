@@ -1,4 +1,8 @@
 # prodsys
 Dockerized Produksjonssystem
 
-Tanken er at branches skal være containere og main skal ikke inneholde annet enn dokumentasjon.
+# Validering av Nordisk EPUB 3
+
+Steg: incoming-nordic
+
+Validerer boken som er produsert hos underleverandør ovenfor Nordiske retningslinjer for EPUB 3.
