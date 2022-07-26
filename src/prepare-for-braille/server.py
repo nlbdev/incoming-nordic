@@ -71,7 +71,7 @@ shouldRun = True
 test = "test" in sys.argv or os.environ.get("TEST", "0") == "1"
 mock_jwt_claims = None
 
-root_path = f"/{os.environ.get('PROJECT_NAME', 'prodsys')}"
+root_path = f"/prepare-for-braille"
 version = 1
 host = os.getenv("HOST", default="0.0.0.0")
 port = os.getenv("PORT", default=80)
@@ -80,7 +80,7 @@ base_url = "http://{}{}{}".format(host,
                                   ":{}".format(port) if port != 80 else "",
                                   root_path)
 
-user_agent_header = {"user-agent": f"{os.environ.get('PROJECT_NAME', 'prodsys')}/{os.environ.get('PROJECT_VERSION', '0')}"}
+user_agent_header = {"user-agent": f"prepare-for-braille/{os.environ.get('PROJECT_VERSION', '0')}"}
 user_agent_header["user-agent"] += f" (nlb.no; environment={os.environ.get('AIRBRAKE_ENVIRONMENT')})"
 
 def route(rule, **options):
