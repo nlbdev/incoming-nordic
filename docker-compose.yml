@@ -1,0 +1,149 @@
+version: "3.8"
+
+services:
+  incoming-nordic:
+    build: 
+      context: ./src
+      dockerfile: ./incoming-nordic/Dockerfile
+    image: incoming-nordic:latest
+    ports:
+      - "8080:8080"
+  create-abstracts:
+    build: 
+      context: ./src
+      dockerfile: ./create-abstracts/Dockerfile
+    image: create-abstracts:latest
+    ports:
+      - "8080:8080"
+  daisy202-to-distribution:
+    build: 
+      context: ./src
+      dockerfile: ./daisy202-to-distribution/Dockerfile
+    image: daisy202-to-distribution:latest
+    ports:
+      - "8080:8080"
+  insert-metadata-braille:
+    build: 
+      context: ./src
+      dockerfile: ./insert-metadata-braille/Dockerfile
+    image: insert-metadata-braille:latest
+    ports:
+      - "8080:8080"
+  insert-metadata-daisy202:
+    build: 
+      context: ./src
+      dockerfile: ./insert-metadata-daisy202/Dockerfile
+    image: insert-metadata-daisy202:latest
+    ports:
+      - "8080:8080"
+  insert-metadata-xhtml:
+    build: 
+      context: ./src
+      dockerfile: ./insert-metadata-xhtml/Dockerfile
+    image: insert-metadata-xhtml:latest
+    ports:
+      - "8080:8080"
+  magazines-to-validation:
+    build: 
+      context: ./src
+      dockerfile: ./magazines-to-validation/Dockerfile
+    image: magazines-to-validation:latest
+    ports:
+      - "8080:8080"
+  newsletter-to-braille:
+    build: 
+      context: ./src
+      dockerfile: ./newsletter-to-braille/Dockerfile
+    image: newsletter-to-braille:latest
+    ports:
+      - "8080:8080"
+  newspaper-schibsted:
+    build: 
+      context: ./src
+      dockerfile: ./newspaper-schibsted/Dockerfile
+    image: newspaper-schibsted:latest
+    ports:
+      - "8080:8080"
+  nlbpub-to-docx:
+    build: 
+      context: ./src
+      dockerfile: ./nlbpub-to-docx/Dockerfile
+    image: nlbpub-to-docx:latest
+    ports:
+      - "8080:8080"
+  nlbpub-to-epub:
+    build: 
+      context: ./src
+      dockerfile: ./nlbpub-to-epub/Dockerfile
+    image: nlbpub-to-epub:latest
+    ports:
+      - "8080:8080"
+  nlbpub-to-html:
+    build: 
+      context: ./src
+      dockerfile: ./nlbpub-to-html/Dockerfile
+    image: nlbpub-to-html:latest
+    ports:
+      - "8080:8080"
+  nlbpub-to-narration-epub:
+    build: 
+      context: ./src
+      dockerfile: ./nlbpub-to-narration-epub/Dockerfile
+    image: nlbpub-to-narration-epub:latest
+    ports:
+      - "8080:8080" 
+  nlbpub-to-pef:
+    build: 
+      context: ./src
+      dockerfile: ./nlbpub-to-pef/Dockerfile
+    image: nlbpub-to-pef:latest
+    ports:
+      - "8080:8080"
+  nlbpub-to-tts-dtbook:
+    build: 
+      context: ./src
+      dockerfile: ./nlbpub-to-tts-dtbook/Dockerfile
+    image: nlbpub-to-tts-dtbook:latest
+    ports:
+      - "8080:8080"
+  nordic-epub-to-nlbpub:
+    build: 
+      context: ./src
+      dockerfile: ./nordic-epub-to-nlbpub/Dockerfile
+    image: nordic-epub-to-nlbpub:latest
+    ports:
+      - "8080:8080"
+  prepare-for-braille:
+    build: 
+      context: ./src
+      dockerfile: ./prepare-for-braille/Dockerfile
+    image: prepare-for-braille:latest
+    ports:
+      - "8080:8080"
+  prepare-for-docx:
+    build: 
+      context: ./src
+      dockerfile: ./prepare-for-docx/Dockerfile
+    image: prepare-for-docx:latest
+    ports:
+      - "8080:8080" 
+  prepare-for-ebook:
+    build: 
+      context: ./src
+      dockerfile: ./prepare-for-ebook/Dockerfile
+    image: prepare-for-ebook:latest
+    ports:
+      - "8080:8080"
+  statped-nlbpub-to-nlbpub:
+    build: 
+      context: ./src
+      dockerfile: ./statped-nlbpub-to-nlbpub/Dockerfile
+    image: statped-nlbpub-to-nlbpub:latest
+    ports:
+      - "8080:8080"
+
+networks:
+  prodsys:
+    internal: true
+    external: true
+  
