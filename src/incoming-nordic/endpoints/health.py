@@ -5,32 +5,22 @@ import psutil
 from flask import jsonify
 
 import cache
-import db
 import server
 
 
 @server.route(server.root_path + '/health/', require_auth=None)
-@db.with_cursor
-def health(cursor):
+def health():
     try:
         head = {}
-
-        sql = "SELECT 1;"
-        cursor.execute(sql)
-        rows = db.fetchall(cursor)
 
         process = psutil.Process(os.getpid())
         memory_used = process.memory_info().rss
         head["memory_used"] = memory_used
         head["memory_used_human_readable"] = human_readable_bytes(memory_used)
-        #  logging.debug(f"Memory used: {human_readable_bytes(memory_used)}")
 
         if not cache.cacheReady:
             head["message"] = "Cache is not ready yet."
             return jsonify({"head": head, "data": False}), 503
-        elif len(rows) == 0:
-            head["message"] = "Unable to query database."
-            return jsonify({"head": head, "data": False}), 500
         else:
             return jsonify({"head": head, "data": True}), 200
 
