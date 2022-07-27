@@ -9,6 +9,7 @@ import pybrake
 
 import cache
 import endpoints.health
+import endpoints.routes
 import server
 
 if sys.version_info[0] != 3 or sys.version_info[1] < 7:
