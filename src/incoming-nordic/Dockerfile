@@ -11,6 +11,7 @@ RUN pip install gunicorn
 
 # Install application
 COPY ./*.py .
+COPY ./core/ ./core/
 COPY ./incoming-nordic/ .
 
 # expose the default HTTPS port
