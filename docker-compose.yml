@@ -1,6 +1,15 @@
 version: "3.8"
 
 services:
+  daisy-ace:
+    build:
+      context: ./src
+      dockerfile: ./daisy-ace/Dockerfile
+    image: daisy-ace:latest
+    ports:
+      - "80:20000"
+    deploy:
+      replicas: 1
   incoming-nordic:
     build:
       context: ./src

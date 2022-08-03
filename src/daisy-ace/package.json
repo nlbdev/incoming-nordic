@@ -1,0 +1,13 @@
+{
+  "name": "daisy-ace",
+  "version": "1.0.0",
+  "description": "Compiler for Daisy ACE on Docker",
+  "main": "index.js",
+  "scripts": {
+    "start": "ace-http -p 80 -c ./config.json"
+  },
+  "private": true,
+  "dependencies": {
+    "@daisy/ace": "^1.2.7"
+  }
+}
