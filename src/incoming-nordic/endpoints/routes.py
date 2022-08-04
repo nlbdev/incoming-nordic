@@ -9,7 +9,6 @@ from xml.etree import ElementTree
 
 import requests
 import server
-
 from core.pipeline import Pipeline
 from core.utils.daisy_pipeline import DaisyPipelineJob
 from core.utils.epub import Epub
@@ -17,32 +16,43 @@ from core.utils.filesystem import Filesystem
 from core.utils.mathml_to_text import Mathml_validator
 from core.utils.xslt import Xslt
 
+
 class IncomingNordic(Pipeline):
     uid = "incoming-nordic"
     title = "Validering av Nordisk EPUB 3"
     labels = ["EPUB", "Statped"]
     publication_format = None
     expected_processing_time = 1400
+    epub = None
+    editionId = ""
 
     ace_cli = os.environ.get("ACE_CLI", None)
 
     def __init__(self, *args, **kwargs):
+        # Define variables
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        # Initialize environment
         IncomingNordic.init_environment()
+        # Initialize the superclass
         super().__init__(*args, **kwargs)
+        # Generate source path from editionId
+        source_path = os.path.join(os.environ.get("PRODSYS_SOURCE_DIR"), self.editionId)
+        # Initialize the EPUB object
+        self.epub = Epub(self.utils.report, path=source_path)
 
     def on_book(self):
-        epub = Epub(self.utils.report, self.book["source"])
         epubTitle = ""
         try:
-            epubTitle = " (" + epub.meta("dc:title") + ") "
+            epubTitle = " (" + self.epub.meta("dc:title") + ") "
         except Exception:
             pass
         # sjekk at dette er en EPUB
-        if not epub.isepub():
+        if not self.epub.isepub():
             self.utils.report.title = self.title + ": " + self.book["name"] + " feilet 😭👎" + epubTitle
             return
 
-        if not epub.identifier():
+        if not self.epub.identifier():
             self.utils.report.error(self.book["name"] + ": Klarte ikke å bestemme boknummer basert på dc:identifier.")
             self.utils.report.title = self.title + ": " + self.book["name"] + " feilet 😭👎" + epubTitle
             return
@@ -50,7 +60,7 @@ class IncomingNordic(Pipeline):
         self.utils.report.info("Lager en kopi av EPUBen med tomme bildefiler")
         temp_noimages_epubdir_obj = tempfile.TemporaryDirectory()
         temp_noimages_epubdir = temp_noimages_epubdir_obj.name
-        Filesystem.copy(self.utils.report, epub.asDir(), temp_noimages_epubdir)
+        Filesystem.copy(self.utils.report, self.epub.asDir(), temp_noimages_epubdir)
         if os.path.isdir(os.path.join(temp_noimages_epubdir, "EPUB", "images")):
             temp_xml_obj = tempfile.NamedTemporaryFile()
             temp_xml = temp_xml_obj.name
@@ -103,7 +113,7 @@ class IncomingNordic(Pipeline):
                                     source=html_file,
                                     target=temp_xml)
                         if not xslt.success:
-                            self.utils.report.title = self.title + ": " + epub.identifier() + " feilet 😭👎" + epubTitle
+                            self.utils.report.title = self.title + ": " + self.epub.identifier() + " feilet 😭👎" + epubTitle
                             return False
                         shutil.copy(temp_xml, html_file)
 
@@ -129,7 +139,7 @@ class IncomingNordic(Pipeline):
                                             + " (deklarert i: " + ", ".join(html_image_references[file]) + ")")
                     image_error = True
             if image_error:
-                self.utils.report.title = self.title + ": " + epub.identifier() + " feilet 😭👎" + epubTitle
+                self.utils.report.title = self.title + ": " + self.epub.identifier() + " feilet 😭👎" + epubTitle
                 return False
 
             for root, dirs, files in os.walk(os.path.join(temp_noimages_epubdir, "EPUB", "images")):
@@ -169,11 +179,11 @@ class IncomingNordic(Pipeline):
 
             if dp2_job.status != "SUCCESS":
                 self.utils.report.error("Klarte ikke å validere boken")
-                self.utils.report.title = self.title + ": " + epub.identifier() + " feilet 😭👎" + epubTitle
+                self.utils.report.title = self.title + ": " + self.epub.identifier() + " feilet 😭👎" + epubTitle
                 return
 
         self.utils.report.debug("Making a copy of the EPUB to work on…")
-        epub_fixed, epub_fixed_obj = epub.copy()
+        epub_fixed, epub_fixed_obj = self.epub.copy()
         epub_unzipped = epub_fixed.asDir()
         nav_path = os.path.join(epub_unzipped, epub_fixed.nav_path())
         mathML_validation_result = True
@@ -201,13 +211,21 @@ class IncomingNordic(Pipeline):
         self.utils.report.debug("Making sure that the EPUB has the correct file and directory permissions…")
         epub_fixed.fix_permissions()
 
-        # TODO send the EPUB to ACE validation
+        # send epub to daisy-ace to get a report
+        res = requests.post(os.environ.daisy_ace_url, files={"epub": open(epub_fixed.asFile(), "rb")})
+        if res.status_code != 200:
+            self.utils.report.error("Klarte ikke generere ACE rapport")
+            self.utils.report.title = self.title + ": " + self.epub.identifier() + " feilet 😭👎" + epubTitle
+            return False
+        else:
+            self.utils.report.info("Genererte ACE rapport")
+            self.utils.report.attachment(res.text, os.path.join(self.utils.report.reportDir(), "ace-report.html"), "SUCCESS")
 
         self.utils.report.info("Boken er valid. Kopierer til EPUB master-arkiv.")
 
-        archived_path, stored = self.utils.filesystem.storeBook(epub_fixed.asDir(), epub.identifier())
+        archived_path, stored = self.utils.filesystem.storeBook(epub_fixed.asDir(), self.epub.identifier())
         self.utils.report.attachment(None, archived_path, "DEBUG")
-        self.utils.report.title = self.title + ": " + epub.identifier() + " er valid 👍😄" + epubTitle
+        self.utils.report.title = self.title + ": " + self.epub.identifier() + " er valid 👍😄" + epubTitle
         self.utils.filesystem.deleteSource()
         return True
 
@@ -228,13 +246,10 @@ def root_path():
 
 @server.route(server.root_path + '/editions/<string:editionId>', methods=["POST"], require_auth=None)
 def process_edition(editionId):
-    # Generate source path from editionId
-    source_path = os.path.join(os.environ.get("PRODSYS_SOURCE_DIR"), editionId)
-
     # Create new IncomingNordic object
-    convert = IncomingNordic(source_path)
+    convert = IncomingNordic(editionId=editionId)
 
-    # Use source url in the IncomingNordic class
+    # 
 
 
-    return 200, "OK"
+    return
