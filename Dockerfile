@@ -1,28 +1,29 @@
-# Dockerfile for the newspaper-schibsted process
-FROM python:3.10.4
+# build incoming-nordic
+FROM python:3.10.4 as incoming-nordic
 
-# Create app directory
+# set app directory
 WORKDIR /usr/src/app
 
-# Install dependencies
-COPY ./requirements.txt .
+# install dependencies
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
 
 # Install application
-COPY ./*.py .
-COPY ./newspaper-schibsted/ .
+COPY src/ ./
 
 # expose the default HTTPS port
 EXPOSE 80
 
-# Run tests
+# run tests
 RUN [ "python", "run.py", "test" ]
 
+# healthcheck
 HEALTHCHECK --interval=20s --timeout=30s --retries=12 --start-period=1200s \
             CMD http_proxy="" https_proxy="" curl --fail \
-            http://${HOST-0.0.0.0}:${PORT:-80}/newspaper-schibsted/v1/health/ || exit 1
+            http://${HOST-0.0.0.0}:${PORT:-80}/incoming-nordic/v1/health/ || exit 1
 
+# run the application
 CMD gunicorn run:app \
     --log-level=${GUNICORN_LOGLEVEL:-info} --access-logfile - \
     --bind 0.0.0.0:${PORT:-80} \
