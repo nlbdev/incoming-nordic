@@ -6,7 +6,6 @@ import asyncio
 from xml.etree import ElementTree
 
 import requests
-import server
 from core.pipeline import Pipeline
 from core.utils.daisy_pipeline import DaisyPipelineJob
 from core.utils.epub import Epub
