@@ -1,5 +1,5 @@
 # build incoming-nordic
-FROM python:3.10.4 as incoming-nordic
+FROM python:3.7.9 as incoming-nordic
 
 # set app directory
 WORKDIR /usr/src/app

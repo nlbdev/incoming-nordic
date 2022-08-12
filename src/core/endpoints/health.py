@@ -3,14 +3,14 @@ import psutil
 import time
 from flask import jsonify
 
-import core.server
+import server
 from core.config import Config
 
 
 system_shouldRun_False_Since = None
 
 
-@core.server.route(core.server.root_path + '/health/', require_auth=None)
+@server.route(server.root_path + '/health/', require_auth=None)
 def health():
     global system_shouldRun_False_Since
 
