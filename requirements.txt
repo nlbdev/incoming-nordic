@@ -198,5 +198,5 @@ werkzeug==2.1.2
     # via
     #   -r requirements.txt
     #   flask
-wheel==0.37.1
+wheel==0.38.1
     # via pip-tools
