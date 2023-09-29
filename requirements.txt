@@ -141,7 +141,7 @@ pycparser==2.21
     # via
     #   -r requirements.txt
     #   cffi
-pydash==5.1.0
+pydash==6.0.0
     # via -r requirements.txt
 pydocstyle==6.1.1
     # via
